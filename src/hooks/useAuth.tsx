@@ -5,14 +5,13 @@ import { useToast } from '@/hooks/use-toast';
 
 interface UserProfile {
   id: string;
+  user_id: string;
   role: 'advertiser' | 'screen_owner' | 'admin';
-  business_name?: string;
-  contact_email?: string;
+  business_name: string;
+  contact_email: string;
   phone?: string;
-  address?: string;
-  city?: string;
-  state?: string;
-  country?: string;
+  website?: string;
+  description?: string;
   is_verified: boolean;
   created_at: string;
   updated_at: string;
@@ -71,14 +70,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { data, error } = await supabase
         .from('user_profiles')
         .select('*')
-        .eq('id', userId)
+        .eq('user_id', userId)
         .single();
 
       if (error && error.code !== 'PGRST116') {
         throw error;
       }
 
-      setProfile(data);
+      if (data) {
+        setProfile(data as UserProfile);
+      }
     } catch (error) {
       console.error('Error fetching profile:', error);
       toast({
@@ -106,7 +107,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const { error: profileError } = await supabase
           .from('user_profiles')
           .insert({
-            id: data.user.id,
+            user_id: data.user.id,
             role: role as 'advertiser' | 'screen_owner' | 'admin',
             business_name: businessName,
             contact_email: email,
@@ -184,7 +185,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase
         .from('user_profiles')
         .update(updates)
-        .eq('id', user.id);
+        .eq('user_id', user.id);
 
       if (error) throw error;
 

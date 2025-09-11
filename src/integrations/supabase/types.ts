@@ -14,7 +14,202 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      bookings: {
+        Row: {
+          campaign_id: string
+          created_at: string
+          end_datetime: string
+          id: string
+          screen_id: string
+          start_datetime: string
+          status: string
+          total_cost: number
+          updated_at: string
+        }
+        Insert: {
+          campaign_id: string
+          created_at?: string
+          end_datetime: string
+          id?: string
+          screen_id: string
+          start_datetime: string
+          status?: string
+          total_cost: number
+          updated_at?: string
+        }
+        Update: {
+          campaign_id?: string
+          created_at?: string
+          end_datetime?: string
+          id?: string
+          screen_id?: string
+          start_datetime?: string
+          status?: string
+          total_cost?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "bookings_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "bookings_screen_id_fkey"
+            columns: ["screen_id"]
+            isOneToOne: false
+            referencedRelation: "screens"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      campaigns: {
+        Row: {
+          advertiser_id: string
+          budget: number
+          created_at: string
+          description: string | null
+          end_date: string
+          id: string
+          name: string
+          start_date: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          advertiser_id: string
+          budget: number
+          created_at?: string
+          description?: string | null
+          end_date: string
+          id?: string
+          name: string
+          start_date: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          advertiser_id?: string
+          budget?: number
+          created_at?: string
+          description?: string | null
+          end_date?: string
+          id?: string
+          name?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaigns_advertiser_id_fkey"
+            columns: ["advertiser_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      screens: {
+        Row: {
+          address: string
+          created_at: string
+          currency: string
+          hourly_rate: number
+          id: string
+          is_active: boolean
+          location: string
+          name: string
+          owner_id: string
+          resolution: string
+          screen_type: string
+          size_inches: number
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          created_at?: string
+          currency?: string
+          hourly_rate: number
+          id?: string
+          is_active?: boolean
+          location: string
+          name: string
+          owner_id: string
+          resolution: string
+          screen_type: string
+          size_inches: number
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          created_at?: string
+          currency?: string
+          hourly_rate?: number
+          id?: string
+          is_active?: boolean
+          location?: string
+          name?: string
+          owner_id?: string
+          resolution?: string
+          screen_type?: string
+          size_inches?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "screens_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["user_id"]
+          },
+        ]
+      }
+      user_profiles: {
+        Row: {
+          business_name: string
+          contact_email: string
+          created_at: string
+          description: string | null
+          id: string
+          is_verified: boolean
+          phone: string | null
+          role: string
+          updated_at: string
+          user_id: string
+          website: string | null
+        }
+        Insert: {
+          business_name: string
+          contact_email: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_verified?: boolean
+          phone?: string | null
+          role: string
+          updated_at?: string
+          user_id: string
+          website?: string | null
+        }
+        Update: {
+          business_name?: string
+          contact_email?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_verified?: boolean
+          phone?: string | null
+          role?: string
+          updated_at?: string
+          user_id?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
