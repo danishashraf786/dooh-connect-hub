@@ -95,32 +95,26 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signUp = async (email: string, password: string, role: string, businessName: string) => {
     try {
       setLoading(true);
+      const redirectUrl = `${window.location.origin}/`;
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            role,
+            business_name: businessName,
+          }
+        }
       });
 
       if (error) throw error;
 
-      if (data.user) {
-        // Create profile
-        const { error: profileError } = await supabase
-          .from('user_profiles')
-          .insert({
-            user_id: data.user.id,
-            role: role as 'advertiser' | 'screen_owner' | 'admin',
-            business_name: businessName,
-            contact_email: email,
-            is_verified: false,
-          });
-
-        if (profileError) throw profileError;
-
-        toast({
-          title: "Success",
-          description: "Account created successfully! Please check your email to verify your account.",
-        });
-      }
+      toast({
+        title: "Success",
+        description: "Account created successfully! Please check your email to verify your account.",
+      });
     } catch (error: any) {
       toast({
         title: "Error",
