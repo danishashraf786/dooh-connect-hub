@@ -8,6 +8,7 @@ import { AuthForm } from "@/components/auth/AuthForm";
 import { Navbar } from "@/components/layout/Navbar";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
+import NewScreen from "./pages/NewScreen";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -44,6 +45,14 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/screens/new" 
+          element={
+            <ProtectedRoute>
+              <NewScreen />
             </ProtectedRoute>
           } 
         />
