@@ -9,6 +9,12 @@ import { Navbar } from "@/components/layout/Navbar";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NewScreen from "./pages/NewScreen";
+import CreateCampaign from "./pages/CreateCampaign";
+import Campaigns from "./pages/Campaigns";
+import DiscoverScreens from "./pages/DiscoverScreens";
+import Bookings from "./pages/Bookings";
+import Analytics from "./pages/Analytics";
+import ScreenSettings from "./pages/ScreenSettings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,6 +59,54 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <NewScreen />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/campaigns/new" 
+          element={
+            <ProtectedRoute>
+              <CreateCampaign />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/campaigns" 
+          element={
+            <ProtectedRoute>
+              <Campaigns />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/discover" 
+          element={
+            <ProtectedRoute>
+              <DiscoverScreens />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/bookings" 
+          element={
+            <ProtectedRoute>
+              <Bookings />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/analytics" 
+          element={
+            <ProtectedRoute>
+              <Analytics />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/settings" 
+          element={
+            <ProtectedRoute>
+              <ScreenSettings />
             </ProtectedRoute>
           } 
         />
