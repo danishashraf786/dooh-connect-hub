@@ -80,6 +80,43 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         throw error;
       }
 
+      // If no profile exists, create one from auth metadata
+      if (!data) {
+        const roleFromMeta = ((user?.user_metadata as any)?.role ?? 'advertiser') as UserProfile['role'];
+        const businessFromMeta = (user?.user_metadata as any)?.business_name as string | undefined;
+        const contactEmail = user?.email ?? '';
+
+        const { data: inserted, error: insertError } = await supabase
+          .from('user_profiles')
+          .insert({
+            user_id: userId,
+            role: roleFromMeta,
+            business_name: businessFromMeta || 'Business',
+            contact_email: contactEmail,
+            is_verified: false,
+          })
+          .select('*')
+          .single();
+
+        if (insertError) throw insertError;
+        setProfile(inserted as UserProfile);
+        return;
+      }
+
+      // If profile exists but role differs from metadata, sync it (when metadata present)
+      const metaRole = (user?.user_metadata as any)?.role as UserProfile['role'] | undefined;
+      if (metaRole && data.role !== metaRole) {
+        const { data: updated, error: updateError } = await supabase
+          .from('user_profiles')
+          .update({ role: metaRole })
+          .eq('user_id', userId)
+          .select('*')
+          .maybeSingle();
+        if (updateError) throw updateError;
+        setProfile((updated as UserProfile) ?? (data as UserProfile));
+        return;
+      }
+
       setProfile((data as UserProfile) ?? null);
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -92,11 +129,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     }
   };
+
   const signUp = async (email: string, password: string, role: string, businessName: string) => {
     try {
       setLoading(true);
       const redirectUrl = `${window.location.origin}/`;
-      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -108,9 +145,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         }
       });
-
       if (error) throw error;
-
       toast({
         title: "Success",
         description: "Account created successfully! Please check your email to verify your account.",
@@ -126,7 +161,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setLoading(false);
     }
   };
-
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
