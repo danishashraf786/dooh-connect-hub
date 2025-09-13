@@ -112,9 +112,55 @@ export type Database = {
           },
         ]
       }
+      creatives: {
+        Row: {
+          advertiser_id: string
+          campaign_id: string
+          created_at: string
+          description: string | null
+          duration_seconds: number | null
+          file_type: string | null
+          id: string
+          public_url: string
+          storage_path: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          advertiser_id: string
+          campaign_id: string
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          file_type?: string | null
+          id?: string
+          public_url: string
+          storage_path?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          advertiser_id?: string
+          campaign_id?: string
+          created_at?: string
+          description?: string | null
+          duration_seconds?: number | null
+          file_type?: string | null
+          id?: string
+          public_url?: string
+          storage_path?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       screens: {
         Row: {
           address: string
+          auto_approve_bookings: boolean
+          cms_api_key: string | null
+          cms_api_url: string | null
+          content_sync_interval: number
           created_at: string
           currency: string
           hourly_rate: number
@@ -123,13 +169,19 @@ export type Database = {
           location: string
           name: string
           owner_id: string
+          realtime_updates: boolean
           resolution: string
           screen_type: string
           size_inches: number
           updated_at: string
+          webhook_url: string | null
         }
         Insert: {
           address: string
+          auto_approve_bookings?: boolean
+          cms_api_key?: string | null
+          cms_api_url?: string | null
+          content_sync_interval?: number
           created_at?: string
           currency?: string
           hourly_rate: number
@@ -138,13 +190,19 @@ export type Database = {
           location: string
           name: string
           owner_id: string
+          realtime_updates?: boolean
           resolution: string
           screen_type: string
           size_inches: number
           updated_at?: string
+          webhook_url?: string | null
         }
         Update: {
           address?: string
+          auto_approve_bookings?: boolean
+          cms_api_key?: string | null
+          cms_api_url?: string | null
+          content_sync_interval?: number
           created_at?: string
           currency?: string
           hourly_rate?: number
@@ -153,10 +211,12 @@ export type Database = {
           location?: string
           name?: string
           owner_id?: string
+          realtime_updates?: boolean
           resolution?: string
           screen_type?: string
           size_inches?: number
           updated_at?: string
+          webhook_url?: string | null
         }
         Relationships: [
           {
