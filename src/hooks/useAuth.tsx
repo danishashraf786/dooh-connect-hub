@@ -44,9 +44,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(session?.user ?? null);
 
       if (session?.user) {
-        // Defer any Supabase calls to avoid deadlocks
+        // Defer any Supabase calls to avoid deadlocks, pass the user from session
         setTimeout(() => {
-          fetchProfile(session.user!.id);
+          fetchProfile(session.user!.id, session.user!);
         }, 0);
       } else {
         setProfile(null);
@@ -59,7 +59,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        fetchProfile(session.user.id, session.user);
       } else {
         setLoading(false);
       }
@@ -68,7 +68,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const fetchProfile = async (userId: string) => {
+  const fetchProfile = async (userId: string, currentUser?: User) => {
     try {
       const { data, error } = await supabase
         .from('user_profiles')
@@ -82,9 +82,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // If no profile exists, create one from auth metadata
       if (!data) {
-        const roleFromMeta = ((user?.user_metadata as any)?.role ?? 'advertiser') as UserProfile['role'];
-        const businessFromMeta = (user?.user_metadata as any)?.business_name as string | undefined;
-        const contactEmail = user?.email ?? '';
+        // Use currentUser if provided, otherwise fall back to user state
+        const userForMeta = currentUser || user;
+        const roleFromMeta = ((userForMeta?.user_metadata as any)?.role ?? 'advertiser') as UserProfile['role'];
+        const businessFromMeta = (userForMeta?.user_metadata as any)?.business_name as string | undefined;
+        const contactEmail = userForMeta?.email ?? '';
+
+        console.log('Creating profile with role:', roleFromMeta, 'from metadata:', userForMeta?.user_metadata);
 
         const { data: inserted, error: insertError } = await supabase
           .from('user_profiles')
@@ -104,8 +108,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       // If profile exists but role differs from metadata, sync it (when metadata present)
-      const metaRole = (user?.user_metadata as any)?.role as UserProfile['role'] | undefined;
+      const userForMeta = currentUser || user;
+      const metaRole = (userForMeta?.user_metadata as any)?.role as UserProfile['role'] | undefined;
+      
+      console.log('Profile exists with role:', data.role, 'metadata role:', metaRole);
+      
       if (metaRole && data.role !== metaRole) {
+        console.log('Syncing role from metadata:', metaRole);
         const { data: updated, error: updateError } = await supabase
           .from('user_profiles')
           .update({ role: metaRole })

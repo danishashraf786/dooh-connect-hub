@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/hooks/useAuth";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { Navbar } from "@/components/layout/Navbar";
@@ -39,12 +39,21 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
 const AppContent = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  
+  // Redirect authenticated users from auth page to dashboard
+  if (user && location.pathname === '/auth') {
+    return <Navigate to="/dashboard" replace />;
+  }
   
   return (
     <div className="min-h-screen bg-background">
       <Navbar />
       <Routes>
-        <Route path="/" element={<Index />} />
+        <Route 
+          path="/" 
+          element={user ? <Navigate to="/dashboard" replace /> : <Index />} 
+        />
         <Route path="/auth" element={<AuthForm />} />
         <Route 
           path="/dashboard" 
