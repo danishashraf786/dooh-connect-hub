@@ -70,6 +70,7 @@ export type Database = {
           advertiser_id: string
           budget: number
           created_at: string
+          creative_id: string | null
           description: string | null
           end_date: string
           id: string
@@ -82,6 +83,7 @@ export type Database = {
           advertiser_id: string
           budget: number
           created_at?: string
+          creative_id?: string | null
           description?: string | null
           end_date: string
           id?: string
@@ -94,6 +96,7 @@ export type Database = {
           advertiser_id?: string
           budget?: number
           created_at?: string
+          creative_id?: string | null
           description?: string | null
           end_date?: string
           id?: string
@@ -109,6 +112,13 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["user_id"]
+          },
+          {
+            foreignKeyName: "campaigns_creative_id_fkey"
+            columns: ["creative_id"]
+            isOneToOne: false
+            referencedRelation: "creatives"
+            referencedColumns: ["id"]
           },
         ]
       }

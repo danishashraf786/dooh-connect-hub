@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { CalendarIcon, DollarSign, Upload, ArrowLeft } from 'lucide-react';
+import { CalendarIcon, DollarSign, Upload, ArrowLeft, FileVideo, FileImage, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const CreateCampaign = () => {
@@ -32,13 +32,39 @@ const CreateCampaign = () => {
     }
   });
 
+  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+  const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handleFileUpload = async (file: File): Promise<string> => {
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+      .from('creatives')
+      .upload(fileName, file, {
+        cacheControl: '3600',
+        upsert: false
+      });
+
+    if (error) throw error;
+
+    const { data: publicUrl } = supabase.storage
+      .from('creatives')
+      .getPublicUrl(data.path);
+
+    return publicUrl.publicUrl;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
 
     setLoading(true);
     try {
-      const { error } = await supabase
+      setUploadProgress(10);
+
+      // Create campaign first
+      const { data: campaign, error: campaignError } = await supabase
         .from('campaigns')
         .insert({
           name: formData.name,
@@ -48,9 +74,50 @@ const CreateCampaign = () => {
           end_date: formData.endDate,
           advertiser_id: user.id,
           status: 'draft'
-        });
+        })
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (campaignError) throw campaignError;
+      setUploadProgress(30);
+
+      let creativeId = null;
+
+      // Handle file upload if present
+      if (uploadedFile) {
+        setUploadProgress(40);
+        const publicUrl = await handleFileUpload(uploadedFile);
+        setUploadProgress(70);
+
+        // Create creative record
+        const { data: creative, error: creativeError } = await supabase
+          .from('creatives')
+          .insert({
+            advertiser_id: user.id,
+            campaign_id: campaign.id,
+            title: formData.content.title,
+            description: formData.content.description,
+            public_url: publicUrl,
+            file_type: uploadedFile.type,
+            storage_path: `${user.id}/${Date.now()}.${uploadedFile.name.split('.').pop()}`
+          })
+          .select()
+          .single();
+
+        if (creativeError) throw creativeError;
+        creativeId = creative.id;
+        setUploadProgress(90);
+
+        // Update campaign with creative_id
+        const { error: updateError } = await supabase
+          .from('campaigns')
+          .update({ creative_id: creativeId })
+          .eq('id', campaign.id);
+
+        if (updateError) throw updateError;
+      }
+
+      setUploadProgress(100);
 
       toast({
         title: "Campaign created successfully!",
@@ -66,6 +133,7 @@ const CreateCampaign = () => {
       });
     } finally {
       setLoading(false);
+      setUploadProgress(0);
     }
   };
 
@@ -199,6 +267,67 @@ const CreateCampaign = () => {
                 </div>
 
                 <div>
+                  <Label htmlFor="fileUpload">Upload Creative File</Label>
+                  <div className="space-y-2">
+                    <input
+                      id="fileUpload"
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) {
+                          setUploadedFile(file);
+                        }
+                      }}
+                      className="hidden"
+                    />
+                    <div className="flex items-center space-x-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => document.getElementById('fileUpload')?.click()}
+                        className="flex items-center"
+                      >
+                        <Upload className="mr-2 h-4 w-4" />
+                        Choose File
+                      </Button>
+                      {uploadedFile && (
+                        <div className="flex items-center space-x-2">
+                          {uploadedFile.type.startsWith('image/') ? (
+                            <FileImage className="h-4 w-4 text-blue-500" />
+                          ) : (
+                            <FileVideo className="h-4 w-4 text-purple-500" />
+                          )}
+                          <span className="text-sm text-muted-foreground">
+                            {uploadedFile.name}
+                          </span>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => setUploadedFile(null)}
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    {uploadProgress > 0 && (
+                      <div className="w-full bg-gray-200 rounded-full h-2">
+                        <div 
+                          className="bg-primary h-2 rounded-full transition-all duration-300" 
+                          style={{ width: `${uploadProgress}%` }}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="text-center text-sm text-muted-foreground">
+                  OR
+                </div>
+
+                <div>
                   <Label htmlFor="imageUrl">Image URL</Label>
                   <Input
                     id="imageUrl"
@@ -209,6 +338,7 @@ const CreateCampaign = () => {
                       content: { ...formData.content, imageUrl: e.target.value }
                     })}
                     placeholder="https://example.com/image.jpg"
+                    disabled={!!uploadedFile}
                   />
                 </div>
 
@@ -223,6 +353,7 @@ const CreateCampaign = () => {
                       content: { ...formData.content, videoUrl: e.target.value }
                     })}
                     placeholder="https://example.com/video.mp4"
+                    disabled={!!uploadedFile}
                   />
                 </div>
 

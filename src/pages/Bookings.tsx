@@ -6,7 +6,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Calendar, DollarSign, Monitor, Clock, ArrowLeft, Check, X, Eye } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Calendar, DollarSign, Monitor, Clock, ArrowLeft, Check, X, Eye, FileImage, FileVideo } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 interface Booking {
@@ -24,6 +25,13 @@ interface Booking {
     user_profiles: {
       business_name: string;
       contact_email: string;
+    };
+    creatives?: {
+      id: string;
+      title: string;
+      description: string;
+      public_url: string;
+      file_type: string;
     };
   };
   screens: {
@@ -59,6 +67,13 @@ const Bookings = () => {
             user_profiles!campaigns_advertiser_id_fkey (
               business_name,
               contact_email
+            ),
+            creatives (
+              id,
+              title,
+              description,
+              public_url,
+              file_type
             )
           ),
           screens!inner (
@@ -260,10 +275,76 @@ const Bookings = () => {
                     </div>
 
                     <div className="flex justify-end space-x-2">
-                      <Button variant="outline" size="sm">
-                        <Eye className="mr-2 h-4 w-4" />
-                        View Details
-                      </Button>
+                      {booking.campaigns.creatives && (
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <Eye className="mr-2 h-4 w-4" />
+                              Preview Content
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent className="max-w-4xl">
+                            <DialogHeader>
+                              <DialogTitle>Campaign Content Preview</DialogTitle>
+                              <DialogDescription>
+                                Review the content for "{booking.campaigns.name}"
+                              </DialogDescription>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div>
+                                <h4 className="font-medium mb-2">Content Details</h4>
+                                <div className="grid grid-cols-2 gap-4 text-sm">
+                                  <div>
+                                    <span className="font-medium">Title:</span> {booking.campaigns.creatives.title || 'No title'}
+                                  </div>
+                                  <div>
+                                    <span className="font-medium">Type:</span> 
+                                    <span className="ml-2 inline-flex items-center">
+                                      {booking.campaigns.creatives.file_type?.startsWith('image/') ? (
+                                        <><FileImage className="mr-1 h-4 w-4" /> Image</>
+                                      ) : (
+                                        <><FileVideo className="mr-1 h-4 w-4" /> Video</>
+                                      )}
+                                    </span>
+                                  </div>
+                                </div>
+                                {booking.campaigns.creatives.description && (
+                                  <div className="mt-2">
+                                    <span className="font-medium">Description:</span>
+                                    <p className="text-muted-foreground">{booking.campaigns.creatives.description}</p>
+                                  </div>
+                                )}
+                              </div>
+                              
+                              <div className="border rounded-lg p-4 bg-gray-50">
+                                <h4 className="font-medium mb-2">Preview</h4>
+                                {booking.campaigns.creatives.file_type?.startsWith('image/') ? (
+                                  <img 
+                                    src={booking.campaigns.creatives.public_url} 
+                                    alt={booking.campaigns.creatives.title || 'Campaign content'}
+                                    className="max-w-full h-auto rounded"
+                                    style={{ maxHeight: '400px' }}
+                                  />
+                                ) : booking.campaigns.creatives.file_type?.startsWith('video/') ? (
+                                  <video 
+                                    src={booking.campaigns.creatives.public_url}
+                                    controls
+                                    className="max-w-full h-auto rounded"
+                                    style={{ maxHeight: '400px' }}
+                                  >
+                                    Your browser does not support the video tag.
+                                  </video>
+                                ) : (
+                                  <div className="text-center py-8 text-muted-foreground">
+                                    Content preview not available
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      )}
+                      
                       {profile?.role === 'screen_owner' && booking.status === 'pending' && (
                         <>
                           <Button 
