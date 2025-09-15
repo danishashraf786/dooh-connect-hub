@@ -173,12 +173,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data: signInData, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) throw error;
+
+      // Proactively ensure profile exists and role is synced right after login
+      const { data: userData } = await supabase.auth.getUser();
+      if (userData?.user) {
+        await fetchProfile(userData.user.id, userData.user);
+      }
 
       toast({
         title: "Success",
