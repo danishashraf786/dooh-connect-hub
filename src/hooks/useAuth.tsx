@@ -126,6 +126,39 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         return;
       }
 
+      // If no metadata role, try to infer from existing data (screens or campaigns)
+      if (!metaRole) {
+        try {
+          const [screensRes, campaignsRes] = await Promise.all([
+            supabase.from('screens').select('id', { head: true, count: 'exact' }).eq('owner_id', userId),
+            supabase.from('campaigns').select('id', { head: true, count: 'exact' }).eq('advertiser_id', userId),
+          ]);
+
+          const screensCount = screensRes.count ?? 0;
+          const campaignsCount = campaignsRes.count ?? 0;
+
+          let inferred: UserProfile['role'] | null = null;
+          if (screensCount > 0 && campaignsCount === 0) inferred = 'screen_owner';
+          if (campaignsCount > 0 && screensCount === 0) inferred = 'advertiser';
+
+          if (inferred && data.role !== inferred) {
+            console.log('Inferring role based on data:', { screensCount, campaignsCount, inferred });
+            const { data: updated, error: updateError } = await supabase
+              .from('user_profiles')
+              .update({ role: inferred })
+              .eq('user_id', userId)
+              .select('*')
+              .maybeSingle();
+            if (!updateError) {
+              setProfile((updated as UserProfile) ?? (data as UserProfile));
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn('Role inference failed:', e);
+        }
+      }
+
       setProfile((data as UserProfile) ?? null);
     } catch (error) {
       console.error('Error fetching profile:', error);
