@@ -91,7 +91,7 @@ const NavLinks = ({ isMobile = false, onLinkClick = () => {} }) => {
 };
 
 export const Navbar = () => {
-  const { user, profile, signOut } = useAuth();
+  const { user, profile, signOut, updateProfile } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
@@ -151,6 +151,19 @@ export const Navbar = () => {
                         Profile Settings
                       </Link>
                     </DropdownMenuItem>
+                    {/* Quick role switcher to resolve incorrect dashboard role */}
+                    {profile?.role !== 'screen_owner' && (
+                      <DropdownMenuItem onClick={() => updateProfile({ role: 'screen_owner' })}>
+                        <Monitor className="mr-2 h-4 w-4" />
+                        Switch to Screen Owner
+                      </DropdownMenuItem>
+                    )}
+                    {profile?.role !== 'advertiser' && (
+                      <DropdownMenuItem onClick={() => updateProfile({ role: 'advertiser' })}>
+                        <Monitor className="mr-2 h-4 w-4" />
+                        Switch to Advertiser
+                      </DropdownMenuItem>
+                    )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={signOut}>
                       <LogOut className="mr-2 h-4 w-4" />
