@@ -9,6 +9,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import Index from "./pages/Index";
 import Dashboard from "./pages/Dashboard";
 import NewScreen from "./pages/NewScreen";
+import ScreenInventory from "./pages/ScreenInventory";
+import ScreenContent from "./pages/ScreenContent";
 import CreateCampaign from "./pages/CreateCampaign";
 import Campaigns from "./pages/Campaigns";
 import DiscoverScreens from "./pages/DiscoverScreens";
@@ -68,6 +70,22 @@ const AppContent = () => {
           element={
             <ProtectedRoute>
               <NewScreen />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/screens/inventory" 
+          element={
+            <ProtectedRoute>
+              <ScreenInventory />
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/screens/content" 
+          element={
+            <ProtectedRoute>
+              <ScreenContent />
             </ProtectedRoute>
           } 
         />

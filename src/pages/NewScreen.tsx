@@ -28,6 +28,9 @@ const NewScreen = () => {
     hourly_rate: '',
     currency: 'USD',
     description: '',
+    cms_api_url: '',
+    cms_api_key: '',
+    webhook_url: '',
   });
 
   const handleInputChange = (field: string, value: string) => {
@@ -61,6 +64,9 @@ const NewScreen = () => {
           size_inches: parseInt(formData.size_inches),
           hourly_rate: parseFloat(formData.hourly_rate),
           currency: formData.currency,
+          cms_api_url: formData.cms_api_url || null,
+          cms_api_key: formData.cms_api_key || null,
+          webhook_url: formData.webhook_url || null,
           is_active: true,
         });
 
@@ -233,6 +239,48 @@ const NewScreen = () => {
                   placeholder="Additional details about your screen, audience demographics, visibility, etc."
                   rows={4}
                 />
+              </div>
+
+              {/* CMS Integration Section */}
+              <div className="space-y-4 border-t pt-6">
+                <h3 className="text-lg font-semibold">CMS Integration (Optional)</h3>
+                <p className="text-sm text-muted-foreground">
+                  Connect your Content Management System to automatically receive and display content
+                </p>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cms_api_url">CMS API URL</Label>
+                  <Input
+                    id="cms_api_url"
+                    value={formData.cms_api_url}
+                    onChange={(e) => handleInputChange('cms_api_url', e.target.value)}
+                    placeholder="https://your-cms.com/api"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="cms_api_key">CMS API Key</Label>
+                  <Input
+                    id="cms_api_key"
+                    type="password"
+                    value={formData.cms_api_key}
+                    onChange={(e) => handleInputChange('cms_api_key', e.target.value)}
+                    placeholder="Your API key for authentication"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="webhook_url">Webhook URL (Optional)</Label>
+                  <Input
+                    id="webhook_url"
+                    value={formData.webhook_url}
+                    onChange={(e) => handleInputChange('webhook_url', e.target.value)}
+                    placeholder="https://your-cms.com/webhook/content-updates"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    URL to receive real-time content updates
+                  </p>
+                </div>
               </div>
             </div>
 

@@ -1,7 +1,7 @@
 import { useAuth } from '@/hooks/useAuth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus, TrendingUp, Monitor, Calendar, DollarSign } from 'lucide-react';
+import { Plus, TrendingUp, Monitor, Calendar, DollarSign, Eye, Settings } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const AdvertiserDashboard = () => {
@@ -130,10 +130,15 @@ const AdvertiserDashboard = () => {
 };
 
 const ScreenOwnerDashboard = () => {
+  const { profile } = useAuth();
+  
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">Screen Owner Dashboard</h1>
+        <div>
+          <h1 className="text-3xl font-bold">Screen Owner Dashboard</h1>
+          <p className="text-muted-foreground">Welcome back, {profile?.business_name || 'Screen Owner'}</p>
+        </div>
         <Button asChild>
           <Link to="/screens/new">
             <Plus className="mr-2 h-4 w-4" />
@@ -201,6 +206,18 @@ const ScreenOwnerDashboard = () => {
               <Link to="/screens/new">
                 <Plus className="mr-2 h-4 w-4" />
                 Add New Screen
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full justify-start">
+              <Link to="/screens/inventory">
+                <Monitor className="mr-2 h-4 w-4" />
+                View Screen Inventory
+              </Link>
+            </Button>
+            <Button asChild variant="outline" className="w-full justify-start">
+              <Link to="/screens/content">
+                <Eye className="mr-2 h-4 w-4" />
+                View Screen Content
               </Link>
             </Button>
             <Button asChild variant="outline" className="w-full justify-start">

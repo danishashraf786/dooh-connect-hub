@@ -19,6 +19,9 @@ interface Screen {
   hourly_rate: number;
   currency: string;
   is_active: boolean;
+  owner: {
+    business_name: string;
+  };
 }
 
 const DiscoverScreens = () => {
@@ -36,7 +39,12 @@ const DiscoverScreens = () => {
     try {
       const { data, error } = await supabase
         .from('screens')
-        .select('*')
+        .select(`
+          *,
+          owner:user_profiles!screens_owner_id_fkey(
+            business_name
+          )
+        `)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
@@ -156,6 +164,11 @@ const DiscoverScreens = () => {
               <CardContent>
                 <div className="space-y-2">
                   <p className="text-sm text-muted-foreground">{screen.address}</p>
+                  
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">Owner:</span>
+                    <span className="text-sm font-medium">{screen.owner?.business_name || 'Unknown'}</span>
+                  </div>
                   
                   <div className="flex items-center justify-between">
                     <span className="text-sm text-muted-foreground">Type:</span>
